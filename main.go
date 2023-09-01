@@ -147,7 +147,10 @@ func handleError(err error) {
 }
 
 func main() {
-	config, _ := readConfigFile()
+	config, confErr := readConfigFile()
+	if confErr != nil {
+		panic(confErr.Error())
+	}
 
 	var servers []Server
 	for _, address := range config.Servers {
@@ -160,7 +163,7 @@ func main() {
 		lb.serveProxy(w, r)
 	}
 	http.HandleFunc("/", handleRedirect)
-	log.Printf("Proxying Requests at port %s\n", fmt.Sprint(lb.port))
-	err := http.ListenAndServe(":"+fmt.Sprint(lb.port), nil)
+	log.Printf("Proxying Requests at port %s\n", lb.port)
+	err := http.ListenAndServe(":"+lb.port, nil)
 	handleError(err)
 }
