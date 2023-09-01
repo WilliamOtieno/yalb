@@ -12,6 +12,6 @@
 
 ## Usage
 
-- Load-balancing algorithms currently supported are
-    `round-robin`
-    `least-connections`
+Load-balancing algorithms currently supported are
+- `round-robin`
+- `least-connections`
