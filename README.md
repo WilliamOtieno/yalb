@@ -24,6 +24,7 @@ Healthcheck support
 
 ## Usage
 
-Build from source to get the binary then:
-
-- `export YALB_CONFIG=/path/to/your/configfile.yaml && ./yalb`
+Get the binary using the instructions [here](#installation):
+ - ```sh
+   export YALB_CONFIG=/path/to/your/configfile.yaml && ./yalb
+   ```
