@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math"
@@ -15,8 +16,9 @@ import (
 )
 
 type SimpleServer struct {
-	address string
-	proxy   *httputil.ReverseProxy
+	address     string
+	healthcheck string
+	proxy       *httputil.ReverseProxy
 }
 
 type LoadBalancer struct {
@@ -30,13 +32,19 @@ type LoadBalancer struct {
 type Server interface {
 	Address() string
 	isAlive() bool
+	HealthCheck() string
 	Serve(w http.ResponseWriter, r *http.Request)
 }
 
 type Config struct {
-	Servers   []string `yaml:"servers"`
-	Algorithm string   `yaml:"algorithm"`
-	Port      string   `yaml:"port"`
+	Servers   map[string]ServerConfig `yaml:"servers"`
+	Algorithm string                  `yaml:"algorithm"`
+	Port      string                  `yaml:"port"`
+}
+
+type ServerConfig struct {
+	Address     string `yaml:"address"`
+	Healthcheck string `yaml:"healthcheck"`
 }
 
 func newSimpleServer(address string) *SimpleServer {
@@ -111,14 +119,18 @@ func readConfigFile() (*Config, error) {
 	handleError(err)
 	conf := &Config{}
 	yamlErr := yaml.Unmarshal(buff, conf)
-	handleError(yamlErr)
+	if yamlErr != nil {
+		panic("Invalid config format. Refer to docs.")
+	}
 	return conf, err
 }
 
 func (server *SimpleServer) Address() string { return server.address }
 
+func (server *SimpleServer) HealthCheck() string { return server.healthcheck }
+
 func (server *SimpleServer) isAlive() bool {
-	resp, err := http.Get(server.address)
+	resp, err := http.Get(fmt.Sprintf("%s%s", server.address, server.healthcheck))
 	if err != nil {
 		return false
 	}
@@ -150,10 +162,13 @@ func main() {
 	if confErr != nil {
 		panic(confErr.Error())
 	}
+	log.Printf("Load Balancing Algo: %s\n", config.Algorithm)
+	log.Printf("Load Balancer Running Port: %s\n", config.Port)
+	log.Printf("Servers found: %d\n", len(config.Servers))
 
 	var servers []Server
-	for _, address := range config.Servers {
-		servers = append(servers, newSimpleServer(address))
+	for _, server := range config.Servers {
+		servers = append(servers, newSimpleServer(server.Address))
 	}
 
 	lb := NewLoadBalancer(config.Port, servers)

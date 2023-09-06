@@ -2,15 +2,25 @@
 
 # Full list of server addresses
 # for the requests to be proxied to
-# e.g http://127.0.0.1:8080
 servers:
-  - "http://127.0.0.1:8001"
-  - "http://127.0.0.1:8002"
-  - "http://127.0.0.1:8003"
-  - "http://127.0.0.1:8004"
+  s1: # arbitrary names
+    address: "http://127.0.0.1:8001" # full domain/ip address with port
+    healthcheck: "/ping" # endpoint on server that returns 200
 
-# round-robin / least-connections
-algorithm: "round-robin"
+  s2:
+    address: "http://127.0.0.1:8002"
+    healthcheck: "/ping"
 
-port: "8081"
+  s3:
+    address: "http://127.0.0.1:8003"
+    healthcheck: "/ping"
+
+  s4:
+    address: "http://127.0.0.1:8004"
+    healthcheck: "/ping"
+
+algorithm: "round-robin" # round-robin / least-connections
+
+port: "8081" # port which the LB will run from
+
 
