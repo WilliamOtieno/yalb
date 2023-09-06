@@ -10,10 +10,20 @@
 - Have `YALB_CONFIG` environment variable that should be a path to your `.yaml` config
 - An example config can be [here](./yalb.yaml)
 
-## Usage
+## Features
 
-Load-balancing algorithms currently supported are
+Common Load-balancing algorithms:
 
 - `round-robin`
 
 - `least-connections`
+
+Healthcheck support
+
+- Add an endpoint say `/ping` that returns `200 OK` on `GET`
+
+## Usage
+
+Build from source to get the binary then:
+
+- `export YALB_CONFIG=/path/to/your/configfile.yaml && ./yalb`
